@@ -7,7 +7,7 @@ from entity.Article import Article, SOURCE_TYPE
 from datetime import datetime
 import pandas as pd
 
-RESULTS_PATH = './articles.csv'
+RESULTS_PATH = './data/articles.csv'
 
 def fetch_fox5():
     """
