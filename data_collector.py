@@ -128,21 +128,21 @@ def fetch_nbc():
 def save_results(articles: List[Article]):
     latest_data_df = pd.DataFrame.from_records([vars(a) for a in articles])
     
+    duplicates = 0
     if os.path.exists(RESULTS_PATH):
         existing_data_df = pd.read_csv(RESULTS_PATH)
         concatted_df = pd.concat([existing_data_df, latest_data_df])
+        total_ = concatted_df.shape[0]
         concatted_df.drop_duplicates(subset=['unique_id'], inplace=True)
+        duplicates = total_ - concatted_df.shape[0]
     else:
         concatted_df = latest_data_df
     
     concatted_df.to_csv(RESULTS_PATH, index=False)
+    print(f'Found {duplicates} duplicates.')
     print(f"Saved {concatted_df.shape[0]} articles.")
 
-
-articles1 = fetch_nbc()
 articles2 = fetch_fox5()
-all_articles = [*articles1, *articles2]
-
-save_results(all_articles)
+save_results(articles2)
 
 
