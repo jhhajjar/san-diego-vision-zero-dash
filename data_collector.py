@@ -124,6 +124,9 @@ def fetch_nbc():
 
     return articles
 
+def log(msg: str):
+    return f'[{datetime.now()}]: {msg}'
+
 
 def save_results(articles: List[Article]):
     latest_data_df = pd.DataFrame.from_records([vars(a) for a in articles])
@@ -139,8 +142,8 @@ def save_results(articles: List[Article]):
         concatted_df = latest_data_df
     
     concatted_df.to_csv(RESULTS_PATH, index=False)
-    print(f'Found {duplicates} duplicates.')
-    print(f"Saved {concatted_df.shape[0]} articles.")
+    log(f'Found {duplicates} duplicates.')
+    log(f"Saved {concatted_df.shape[0]} articles.")
 
 articles2 = fetch_fox5()
 save_results(articles2)
