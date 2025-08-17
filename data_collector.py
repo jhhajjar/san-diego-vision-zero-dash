@@ -125,7 +125,7 @@ def fetch_nbc():
     return articles
 
 def log(msg: str):
-    return f'[{datetime.now()}]: {msg}'
+    print(f'[{datetime.now()}]: {msg}')
 
 
 def save_results(articles: List[Article]):
