@@ -8,5 +8,5 @@ CORS(app)
 @app.route("/articles")
 def articles():
     df = pd.read_csv('data/articles.csv')
-    df = df.sort_values(by='date_posted')
+    df = df.sort_values(by='date_posted', ascending=False)
     return df.to_json(orient='records')
