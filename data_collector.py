@@ -1,3 +1,5 @@
+from services.gemini_service import process_articles
+from utils.logging import log
 from typing import List
 import requests
 import json
@@ -7,7 +9,7 @@ from entity.Article import Article, SOURCE_TYPE
 from datetime import datetime
 import pandas as pd
 from utils.constants import FOX5_HEADERS, NBC7_HEADERS
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 
 RESULTS_PATH = './data/articles2.csv'
 
@@ -55,7 +57,7 @@ def fetch_fox5():
         )
         article_objects.append(article_object)
 
-    log(f'Fetched {len(article_objects)} articles from FOX5')
+    log(f'Fetched {len(article_objects)} articles from FOX5.')
     return article_objects
 
 def fetch_nbc7():
@@ -86,11 +88,8 @@ def fetch_nbc7():
         )
         articles.append(article)
 
-    log(f'Fetched {len(articles)} articles from NBC7')
+    log(f'Fetched {len(articles)} articles from NBC7.')
     return articles
-
-def log(msg: str):
-    print(f'[{datetime.now()}]: {msg}')
 
 
 def save_results(articles: List[Article]):
@@ -108,9 +107,9 @@ def save_results(articles: List[Article]):
     
     concatted_df.to_csv(RESULTS_PATH, index=False)
     log(f'Found {duplicates} duplicates.')
-    log(f"Saved {concatted_df.shape[0]} articles.")
+    log(f"Saved {concatted_df.shape[0]} articles to {RESULTS_PATH}.")
 
-def main(args: ArgumentParser):
+def main(args: Namespace):
     # Fetch articles
     articles = []
     if args.source == SOURCE_TYPE.FOX5:
@@ -124,20 +123,22 @@ def main(args: ArgumentParser):
         
     # Get article text
     for article in articles:
-        log(f'Fetching {article.link}...')
+        log(f'Fetching {article.link}')
         article.set_article_text()
-        article.evaluate_relevance()
     
     # Evaluate their relevance
-    
+    process_articles(articles)
+
     # Save results
-    save_results(articles)
+    if args.save_results:
+        save_results(articles)
+    else:
+        print(articles)
     
 
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--source', action='store_const', default='all')
-    parser.add_argument('--use-ai', action='store_true', default=False)
     parser.add_argument('--save-results', action='store_true', default=True)
     args = args = parser.parse_args()
     main(args)

@@ -1,3 +1,4 @@
+from datetime import datetime
 from entity.Article import SOURCE_TYPE, Article
 
 
@@ -16,7 +17,7 @@ def get_nbc7_mock_article() -> Article:
         238,
         'Something',
         'https://www.nbcsandiego.com/news/local/pedestrian-63-seriously-injured-in-el-cajon-hit-and-run/3921202/',
-        '',
+        datetime.now(),
         None,
         source=SOURCE_TYPE.NBC7,
     )

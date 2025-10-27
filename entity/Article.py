@@ -42,7 +42,11 @@ class Article:
         self.date_posted = date_posted
         self.summary = summary
         self.source = source
+        
         self.text = None
+        self.is_relevant = None
+        self.collision_location = None
+        self.collision_date = None
 
         self.unique_id = f'{source}{web_id}'
 
@@ -104,6 +108,27 @@ class Article:
         response = requests.get(self.link, headers=self.get_headers())
         parsed = BeautifulSoup(response.text, 'html.parser')
         self.text = parse_article(parsed, self.source)
+        
+    def gemini_process(self) -> None:
+        prompt = f'Extract the following from the article in a list in the following format: does it talk about a traffic collision (1 or 0), location of collision, date of collision (MM/DD/YYYY Pacific Timezone): {article.text}, Date posted: {article.date_posted}.'
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-lite", contents=prompt,
+        )
+        print(response.text)
+        content = response.text
+        splits = content.split('\n')
+        count = 0
+        for split in splits:
+            if len(split) and split[0] == '*':
+                if count == 0:
+                    relevant = split.split(':')[1].strip()
+                    count += 1
+                elif count == 1:
+                    location = split.split(':')[1].strip()
+                    count += 1
+                elif count == 2:
+                    date = split.split(':')[1].strip()
+                    count += 1
         
 def parse_article(soup: BeautifulSoup, source: SOURCE_TYPE):
     if source == SOURCE_TYPE.FOX5:
