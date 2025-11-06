@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+from services.aws_service import read_file_s3, upload_file_s3
 from services.gemini_service import process_articles
 from utils.logging import log
 from typing import List
@@ -99,18 +101,17 @@ def save_results(articles: List[Article]):
     latest_data_df = pd.DataFrame.from_records([vars(a) for a in articles])
     
     duplicates = 0
-    if os.path.exists(RESULTS_PATH):
-        existing_data_df = pd.read_csv(RESULTS_PATH)
-        concatted_df = pd.concat([existing_data_df, latest_data_df])
-        total_ = concatted_df.shape[0]
-        concatted_df.drop_duplicates(subset=['unique_id'], inplace=True)
-        duplicates = total_ - concatted_df.shape[0]
-    else:
-        concatted_df = latest_data_df
+    existing_data_df = read_file_s3(os.getenv('S3_ARTICLES_FILENAME'))
+    concatted_df = pd.concat([existing_data_df, latest_data_df])
+    total_ = concatted_df.shape[0]
+    concatted_df.drop_duplicates(subset=['unique_id'], inplace=True)
+    duplicates = total_ - concatted_df.shape[0]
     
-    concatted_df.to_csv(RESULTS_PATH, index=False)
     log(f'Found {duplicates} duplicates.')
-    log(f"Saved {concatted_df.shape[0]} articles to {RESULTS_PATH}.")
+    log(f"Saving {concatted_df.shape[0]} articles to {RESULTS_PATH}.")
+    
+    article_filename = os.getenv('S3_ARTICLES_FILENAME')
+    upload_file_s3(concatted_df, article_filename)
 
 
 def main(args: Namespace):
@@ -145,6 +146,7 @@ if __name__ == '__main__':
     parser.add_argument('--source', action='store_const', default='all')
     parser.add_argument('--save-results', action='store_true', default=True)
     args = args = parser.parse_args()
+    load_dotenv()
     main(args)
 
 
