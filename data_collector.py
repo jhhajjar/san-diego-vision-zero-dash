@@ -108,7 +108,7 @@ def save_results(articles: List[Article]):
     duplicates = total_ - concatted_df.shape[0]
     
     log(f'Found {duplicates} duplicates.')
-    log(f"Saving {concatted_df.shape[0]} articles to {RESULTS_PATH}.")
+    log(f"Saving {concatted_df.shape[0]} articles to AWS.")
     
     article_filename = os.getenv('S3_ARTICLES_FILENAME')
     upload_file_s3(concatted_df, article_filename)
