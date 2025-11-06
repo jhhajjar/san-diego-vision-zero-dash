@@ -11,7 +11,9 @@ import pandas as pd
 from utils.constants import FOX5_HEADERS, NBC7_HEADERS
 from argparse import ArgumentParser, Namespace
 
+
 RESULTS_PATH = './data/articles2.csv'
+
 
 def fetch_fox5():
     """
@@ -59,6 +61,7 @@ def fetch_fox5():
 
     log(f'Fetched {len(article_objects)} articles from FOX5.')
     return article_objects
+
 
 def fetch_nbc7():
     url = 'https://www.nbcsandiego.com/wp-json/nbc/v1/template/term/1:13:461?page=1'
@@ -108,6 +111,7 @@ def save_results(articles: List[Article]):
     concatted_df.to_csv(RESULTS_PATH, index=False)
     log(f'Found {duplicates} duplicates.')
     log(f"Saved {concatted_df.shape[0]} articles to {RESULTS_PATH}.")
+
 
 def main(args: Namespace):
     # Fetch articles

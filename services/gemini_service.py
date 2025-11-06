@@ -1,27 +1,38 @@
+import json
 import time
-from google import genai
-from datetime import datetime
-from typing import List
+import os
 from entity.Article import Article
 from utils.logging import log
+from pydantic import BaseModel, Field
+from datetime import datetime
+from google import genai
+from typing import List
 from dotenv import load_dotenv
-import os
 
 MAX_REQUESTS_PER_MINUTE = 30
 GEMINI_MODEL = 'gemini-2.0-flash-lite'
-DELIM='^'
-BASE_PROMPT = 'Answer the following questions about the article in the format question{DELIM}answer (my script will look for the answer after the {DELIM}). Does it talk about a traffic collision (1 or 0), location of collision, date of collision (MM/DD/YYYY Pacific Timezone).'
+BASE_PROMPT = f'Please extract the information from the article.'
+
+class GeminiResponse(BaseModel):
+    aboutTrafficCollision: bool = Field(description='Whether or not the article is reporting on a traffic collision.')
+    location: str = Field(description='Where the collision occurred')
+    date: str = Field(description='The date when the collision occured')    
 
 def get_gemini_client():
     load_dotenv()
     return genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 
-def prompt_gemini(client: genai.Client, prompt: str, model: str = 'gemini-2.0-flash-lite') -> str:
+def prompt_gemini(client: genai.Client, prompt: str, model: str = 'gemini-2.0-flash-lite') -> GeminiResponse:
     try:
         response = client.models.generate_content(
-            model=model, contents=prompt,
+            model=model, 
+            contents=prompt,
+            config={
+                "response_mime_type": "application/json",
+                "response_json_schema": GeminiResponse.model_json_schema(),
+            }
         )
-        return response.text
+        return json.loads(response.text)
     except Exception as e:
         raise e
 
@@ -34,7 +45,7 @@ def process_articles(articles: List[Article]) -> None:
         # deal with rate limit
         time_since_start = datetime.now() - start
         if requests_sent == MAX_REQUESTS_PER_MINUTE and time_since_start.seconds <= 60:
-            halt = 61 - time_since_start
+            halt = 61 - time_since_start.seconds
             log(f'Time limit reached, sent {requests_sent} requests in {time_since_start.seconds} seconds, sleeping for {halt}')
             time.sleep(halt)
             
@@ -42,29 +53,10 @@ def process_articles(articles: List[Article]) -> None:
         log(f'Processing article {article.title}.')
         prompt = f'{BASE_PROMPT} Article Text: {article.text}, Article publication date: {article.date_posted}.'
         gemini_response = prompt_gemini(client, prompt, GEMINI_MODEL)
-        print(f'\n{gemini_response}\n')
+        log(f'\n{gemini_response}\n')
         requests_sent += 1
-        
-        # extract info from prompt
-        count = 0
-        relevant = None
-        location = None
-        date = None
-        splits = gemini_response.split('\n')
-        for split in splits:
-            components = split.split('{DELIM}')
-            if len(components) > 1:
-                if count == 0:
-                    relevant = int(split.split('{DELIM}')[1].strip())
-                    count += 1
-                elif count == 1 and relevant:
-                    location = split.split('{DELIM}')[1].strip()
-                    count += 1
-                elif count == 2 and relevant:
-                    date = split.split('{DELIM}')[1].strip()
-                    count += 1
                 
         # update article fields
-        article.is_relevant = relevant
-        article.collision_location = location
-        article.collision_date = date
+        article.is_relevant = gemini_response['aboutTrafficCollision']
+        article.collision_location = gemini_response['location']
+        article.collision_date = gemini_response['date']
