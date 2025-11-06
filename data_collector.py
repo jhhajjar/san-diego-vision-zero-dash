@@ -14,9 +14,6 @@ from utils.constants import FOX5_HEADERS, NBC7_HEADERS
 from argparse import ArgumentParser, Namespace
 
 
-RESULTS_PATH = './data/articles2.csv'
-
-
 def fetch_fox5():
     """
     Fetches the list of traffic articles on the Fox 5 san diego page.
