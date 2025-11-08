@@ -63,5 +63,6 @@ def process_articles(articles: List[Article]) -> None:
                 
         # update article fields
         article.is_relevant = gemini_response['aboutTrafficCollision']
+        article.collision_description = gemini_response['collisionDesc']
         article.collision_location = gemini_response['location']
         article.collision_date = gemini_response['date']
