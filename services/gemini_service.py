@@ -9,7 +9,7 @@ from google import genai
 from typing import List
 from dotenv import load_dotenv
 
-MAX_REQUESTS_PER_MINUTE = 30
+MAX_REQUESTS_PER_MINUTE = 20 # max is actually 30 for gemini-2.0-flash-lite, but play it safe
 GEMINI_MODEL = 'gemini-2.0-flash-lite'
 BASE_PROMPT = f'Please extract the information from the article.'
 
