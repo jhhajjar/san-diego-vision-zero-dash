@@ -3,3 +3,5 @@
 **work**
 **.vscode**
 .env
+**data/**
+mocking.py
