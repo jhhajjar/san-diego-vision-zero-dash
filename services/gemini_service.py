@@ -14,8 +14,9 @@ GEMINI_MODEL = 'gemini-2.0-flash-lite'
 BASE_PROMPT = f'Please extract the information from the article.'
 
 class GeminiResponse(BaseModel):
-    aboutTrafficCollision: bool = Field(description='Whether or not the article is reporting on a traffic collision.')
-    location: str = Field(description='Where the collision occurred')
+    aboutTrafficCollision: bool = Field(description='Determine if the article is reporting on a single, specific, recent traffic collision that occurred at a named location.')
+    collisionDesc: str = Field(description='A brief description of the collision (if aboutTrafficCollision is True)')
+    location: str = Field(description='The location where the collision occurred')
     date: str = Field(description='The date when the collision occured')    
 
 def get_gemini_client():
@@ -35,6 +36,10 @@ def prompt_gemini(client: genai.Client, prompt: str, model: str = 'gemini-2.0-fl
         return json.loads(response.text)
     except Exception as e:
         raise e
+    
+def create_prompt(article: Article) -> str:
+    prompt = f'{BASE_PROMPT} Article headline: {article.title} | Article Text: {article.text} | Article publication date: {article.date_posted}.'
+    return prompt
 
 # We process all articles at once to deal with the time limit
 def process_articles(articles: List[Article]) -> None:
@@ -51,7 +56,7 @@ def process_articles(articles: List[Article]) -> None:
             
         # prompt gemini
         log(f'Processing article {article.title}.')
-        prompt = f'{BASE_PROMPT} Article Text: {article.text}, Article publication date: {article.date_posted}.'
+        prompt = create_prompt(article)
         gemini_response = prompt_gemini(client, prompt, GEMINI_MODEL)
         log(f'\n{gemini_response}\n')
         requests_sent += 1
