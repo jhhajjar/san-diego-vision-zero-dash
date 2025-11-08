@@ -5,20 +5,20 @@ from dotenv import load_dotenv
 from io import StringIO
 
 COLUMNS = [
-    'id',
-    'web_id',
-    'title',
-    'link',
-    'date_posted',
-    'summary',
-    'source',
-    'text',
-    'unique_id',
-    'created_at',
-    'updated_at',
-    'is_relevant',
-    'collision_location',
-    'collision_date'
+    "id",
+    "web_id",
+    "title",
+    "link",
+    "date_posted",
+    "summary",
+    "source",
+    "text",
+    "unique_id",
+    "created_at",
+    "updated_at",
+    "is_relevant",
+    "collision_location",
+    "collision_date",
 ]
 
 
@@ -35,9 +35,9 @@ def upload_file_s3(df, file_name) -> bool:
 
     # Upload the file
     load_dotenv()
-    access_key = os.getenv('S3_ACCESS_KEY')
-    secret_key = os.getenv('S3_SECRET_KEY')
-    bucket = os.getenv('S3_BUCKET')
+    access_key = os.getenv("S3_ACCESS_KEY")
+    secret_key = os.getenv("S3_SECRET_KEY")
+    bucket = os.getenv("S3_BUCKET")
 
     s3_client = boto3.client(
         "s3",
@@ -60,9 +60,9 @@ def read_file_s3(file_name) -> pd.DataFrame:
     :return: True if file was uploaded, else False
     """
     load_dotenv()
-    access_key = os.getenv('S3_ACCESS_KEY')
-    secret_key = os.getenv('S3_SECRET_KEY')
-    bucket_name = os.getenv('S3_BUCKET')
+    access_key = os.getenv("S3_ACCESS_KEY")
+    secret_key = os.getenv("S3_SECRET_KEY")
+    bucket_name = os.getenv("S3_BUCKET")
 
     s3_client = boto3.client(
         "s3",
@@ -71,7 +71,7 @@ def read_file_s3(file_name) -> pd.DataFrame:
     )
     try:
         response = s3_client.get_object(Bucket=bucket_name, Key=file_name)
-        df = pd.read_csv(response['Body'])
+        df = pd.read_csv(response["Body"])
     except Exception as e:
         print(e)
         return pd.DataFrame(columns=COLUMNS)
