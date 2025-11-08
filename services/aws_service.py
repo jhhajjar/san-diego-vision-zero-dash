@@ -22,7 +22,7 @@ COLUMNS = [
 ]
 
 
-def upload_file_s3(df, file_name):
+def upload_file_s3(df, file_name) -> bool:
     """Upload a file to an S3 bucket
 
     :param file_name: File to upload
@@ -52,7 +52,7 @@ def upload_file_s3(df, file_name):
     return True
 
 
-def read_file_s3(file_name):
+def read_file_s3(file_name) -> pd.DataFrame:
     """Read transaction list from an S3 bucket
 
     :param file_name: File to read
