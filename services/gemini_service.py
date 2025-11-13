@@ -81,3 +81,6 @@ def process_articles(articles: List[Article]) -> None:
         article.collision_description = gemini_response["collisionDesc"]
         article.collision_location = gemini_response["location"]
         article.collision_date = gemini_response["date"]
+
+        # Add a pause to ease gemini strain
+        time.sleep(4)
