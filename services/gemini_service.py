@@ -7,12 +7,11 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from google import genai
 from typing import List
-from dotenv import load_dotenv
 
 MAX_REQUESTS_PER_MINUTE = (
-    20  # max is actually 30 for gemini-2.0-flash-lite, but play it safe
+    5  # max is actually 10 for gemini-2.5-flash-lite, but play it safe
 )
-GEMINI_MODEL = "gemini-2.0-flash-lite"
+GEMINI_MODEL = "gemini-2.5-flash-lite"
 BASE_PROMPT = "Please extract the information from the article."
 
 
@@ -28,12 +27,11 @@ class GeminiResponse(BaseModel):
 
 
 def get_gemini_client():
-    load_dotenv()
     return genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 def prompt_gemini(
-    client: genai.Client, prompt: str, model: str = "gemini-2.0-flash-lite"
+    client: genai.Client, prompt: str, model: str = "gemini-2.5-flash-lite"
 ) -> GeminiResponse:
     try:
         response = client.models.generate_content(
