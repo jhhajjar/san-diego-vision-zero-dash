@@ -105,8 +105,16 @@ def main(args: Namespace):
     elif args.source == SOURCE_TYPE.NBC7:
         articles = fetch_nbc7()
     else:
-        fox_articles = fetch_fox5()
-        nbc_articles = fetch_nbc7()
+        try:
+            fox_articles = fetch_fox5()
+        except Exception as e:
+            log(f"Error fetching FOX5 articles: {e}")
+            fox_articles = []
+        try:
+            nbc_articles = fetch_nbc7()
+        except Exception as e:
+            log(f"Error fetching NBC7 articles: {e}")
+            nbc_articles = []
         articles = fox_articles + nbc_articles
 
     # Get article text

@@ -23,7 +23,6 @@ FOX5_HEADERS = {
     "Accept-Language": "en-US,en;q=0.5",
     "Accept-Encoding": "gzip, deflate, br, zstd",
     "Connection": "keep-alive",
-    "Cookie": "_pxhd=2b4e910bd95026954cec04726b569a87c1375a9309cc3edd2ed6c916e3458ab7:91d570d8-6b48-11f0-a9a7-6309a78f3214; OptanonConsent=isGpcEnabled=0&datestamp=Mon+Aug+04+2025+20%3A37%3A50+GMT-0700+(Pacific+Daylight+Time)&version=202507.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=8fc09176-e907-48e0-9b31-0126ce4ca207&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&GPPCookiesCount=1&groups=C0001%3A1%2CSSPD_BG%3A1%2CC0002%3A1%2CC0004%3A1%2CC0007%3A1%2CC0003%3A1&intType=3&geolocation=US%3BCA&AwaitingReconsent=false; OTGPPConsent=DBABLA~BVQqAAAAAACA.QA; usprivacy=1YNN; pxcts=92ae0797-6b48-11f0-9be0-0b47c33df98d; _pxvid=91d570d8-6b48-11f0-a9a7-6309a78f3214; OptanonAlertBoxClosed=2025-07-28T00:19:52.575Z; OneTrustWPCCPAGoogleOptOut=false; nxstoryVariation=nxstory-auto-minimalist; _px2=eyJ1IjoiOGZhYmZlYTAtNzFhZC0xMWYwLWFiMjQtNmZmYjhhZjQ5MWNmIiwidiI6IjkxZDU3MGQ4LTZiNDgtMTFmMC1hOWE3LTYzMDlhNzhmMzIxNCIsInQiOjE3NTQzNjUzNzE4MzQsImgiOiJhNmQ5YjkyYjQ0ZTQxNmE0ZDNjYzVjODM1YmZjN2ViNzYzMTQ4MGY1Yjg5MGQxNmIyOGZlYzdlNzZiZGQ1ODFjIn0=; referralId=Direct",
     "Upgrade-Insecure-Requests": "1",
     "Sec-Fetch-Dest": "document",
     "Sec-Fetch-Mode": "navigate",
