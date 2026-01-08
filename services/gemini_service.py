@@ -60,12 +60,15 @@ def process_articles(articles: List[Article]) -> None:
     for article in articles:
         # deal with rate limit
         time_since_start = datetime.now() - start
-        if requests_sent == MAX_REQUESTS_PER_MINUTE and time_since_start.seconds <= 60:
+        if requests_sent >= MAX_REQUESTS_PER_MINUTE and time_since_start.seconds <= 60:
             halt = 61 - time_since_start.seconds
             log(
                 f"Time limit reached, sent {requests_sent} requests in {time_since_start.seconds} seconds, sleeping for {halt}"
             )
             time.sleep(halt)
+            # reset counters
+            start = datetime.now()
+            requests_sent = 0
 
         # prompt gemini
         log(f"Processing article {article.title}.")
