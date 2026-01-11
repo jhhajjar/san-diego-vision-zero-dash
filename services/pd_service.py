@@ -3,6 +3,7 @@ from typing import Tuple
 import pandas as pd
 
 from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
+from services.geocoding_service import geocode_address
 
 
 def read_pd_csv() -> pd.DataFrame:
@@ -91,6 +92,16 @@ def map_incident_dict_to_incident_dto(incident_dicts: list[dict]) -> list[Incide
         incident_dto.hit_run_lvl = incident_dict.get("hit_run_lvl")
         incident_dto.neighborhood = incident_dict.get("neighborhood")
         incident_dto.full_address = incident_dict.get("full_address")
+
+        # Geocode the address to get lat/lng
+        coords = geocode_address(incident_dto.full_address)
+        if coords:
+            incident_dto.latitude = coords[0]
+            incident_dto.longitude = coords[1]
+        else:
+            incident_dto.latitude = None
+            incident_dto.longitude = None
+
         incident_dtos.append(vars(incident_dto))
     return incident_dtos
 

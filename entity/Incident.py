@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 
 class HitRunLevel(Enum):
@@ -27,6 +28,8 @@ class IncidentDTO:
     hit_run_lvl: HitRunLevel
     neighborhood: str
     full_address: str
+    latitude: Optional[float]
+    longitude: Optional[float]
 
 
 class IncidentListDTO:
