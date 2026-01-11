@@ -1,4 +1,5 @@
 import re
+from typing import Tuple
 import pandas as pd
 
 from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
@@ -94,12 +95,14 @@ def map_incident_dict_to_incident_dto(incident_dicts: list[dict]) -> list[Incide
     return incident_dtos
 
 
-def get_incidents(page: int = 1, page_size: int = 10) -> pd.DataFrame:
+def get_incidents_and_count(
+    page: int = 1, page_size: int = 10
+) -> Tuple[pd.DataFrame, int]:
     df = read_pd_csv()
     filtered_df = filter_for_casualties(df)
     df_with_addresses = parse_full_address(filtered_df)
     paginated_df = paginate(df_with_addresses, page, page_size)
-    return paginated_df
+    return paginated_df, len(filtered_df)
 
 
 def get_incident_metadata(df: pd.DataFrame) -> IncidentMetadataDTO:
@@ -107,20 +110,20 @@ def get_incident_metadata(df: pd.DataFrame) -> IncidentMetadataDTO:
     dto_object.latest_date = df["date_time"].max()
     dto_object.number_of_days_since_last_incident = (
         pd.Timestamp.now() - df["date_time"].max()
-    ).days
+    ).days + 1
     return dto_object
 
 
 def map_incident_df_to_incident_list_dto(
-    df: pd.DataFrame, page: int, page_size: int
+    df: pd.DataFrame, page: int, page_size: int, total: int
 ) -> IncidentListDTO:
     dto_object = IncidentListDTO()
     dto_object.incidents = map_incident_dict_to_incident_dto(
         df.to_dict(orient="records")
     )
     dto_object.page = page
-    dto_object.page_size = page_size
-    dto_object.total_incidents = len(df)
+    dto_object.pageSize = page_size
+    dto_object.totalIncidents = total
     return dto_object
 
 

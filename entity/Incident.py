@@ -32,8 +32,8 @@ class IncidentDTO:
 class IncidentListDTO:
     incidents: list[IncidentDTO]
     page: int
-    page_size: int
-    total_incidents: int
+    pageSize: int
+    totalIncidents: int
 
 
 class IncidentMetadataDTO:

@@ -2,7 +2,7 @@ import os
 from services.aws_service import read_file_s3
 from services.pd_service import (
     get_incident_metadata,
-    get_incidents,
+    get_incidents_and_count,
     map_incident_df_to_incident_list_dto,
     read_pd_csv,
     filter_for_casualties,
@@ -31,14 +31,14 @@ def articles():
 def incidents():
     # Parse pagination parameters
     page = request.args.get("page", default=1, type=int)
-    page_size = request.args.get("page_size", default=10, type=int)
+    page_size = request.args.get("pageSize", default=10, type=int)
 
     # Fetch paginated incidents
-    incidents_df = get_incidents(page=page, page_size=page_size)
+    incidents_df, total = get_incidents_and_count(page=page, page_size=page_size)
 
     # Map to DTO
     mapped_response = map_incident_df_to_incident_list_dto(
-        incidents_df, page, page_size
+        incidents_df, page, page_size, total
     )
 
     return jsonify(vars(mapped_response)), 200
