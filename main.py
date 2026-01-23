@@ -15,8 +15,9 @@ app = Flask(__name__)
 load_dotenv()
 
 # Configure CORS - restrict to frontend URL in production
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
-CORS(app, origins=allowed_origins)
+# allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# CORS(app, origins=allowed_origins)
+CORS(app)
 
 
 @app.route("/articles")
