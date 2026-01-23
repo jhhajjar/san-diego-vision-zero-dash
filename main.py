@@ -12,8 +12,11 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
-CORS(app)
 load_dotenv()
+
+# Configure CORS - restrict to frontend URL in production
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+CORS(app, origins=allowed_origins)
 
 
 @app.route("/articles")
