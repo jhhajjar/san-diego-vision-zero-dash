@@ -120,8 +120,8 @@ def get_incident_metadata(df: pd.DataFrame) -> IncidentMetadataDTO:
     dto_object = IncidentMetadataDTO()
     dto_object.latest_date = df["date_time"].max()
     dto_object.number_of_days_since_last_incident = (
-        pd.Timestamp.now() - df["date_time"].max()
-    ).days + 1
+        pd.Timestamp.now() - dto_object.latest_date
+    ).days
     return dto_object
 
 
