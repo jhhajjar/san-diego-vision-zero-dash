@@ -1,9 +1,10 @@
 import re
-from typing import Tuple
 import pandas as pd
+import pytz
 
-from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
 from services.geocoding_service import geocode_address
+from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
+from typing import Tuple
 
 
 def read_pd_csv() -> pd.DataFrame:
@@ -117,11 +118,22 @@ def get_incidents_and_count(
 
 
 def get_incident_metadata(df: pd.DataFrame) -> IncidentMetadataDTO:
+    la_tz = pytz.timezone("America/Los_Angeles")
     dto_object = IncidentMetadataDTO()
     dto_object.latest_date = df["date_time"].max()
-    dto_object.number_of_days_since_last_incident = (
-        pd.Timestamp.now().date() - dto_object.latest_date.date()
-    ).days
+
+    # Get current date in LA timezone
+    now_la = pd.Timestamp.now(tz=la_tz).date()
+
+    # Assume latest_date is in LA timezone (localize if naive)
+    latest_date = dto_object.latest_date
+    if latest_date.tzinfo is None:
+        print(latest_date)
+        latest_date = la_tz.localize(latest_date)
+        print(latest_date)
+    latest_date_la = latest_date.date()
+
+    dto_object.number_of_days_since_last_incident = (now_la - latest_date_la).days
     return dto_object
 
 
