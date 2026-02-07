@@ -38,11 +38,24 @@ def read_pd_csv() -> pd.DataFrame:
 
     # Create a mapping: index = beat, value = neighborhood
     mapping = beats_df.set_index("beat")["neighborhood"]
-    # Create the new column in df1 by mapping the 'beat' column
-    incident_df["neighborhood"] = incident_df["police_beat"].map(mapping)
+    # Create the new column in df1 by mapping the 'beat' column (default to "" if not found)
+    incident_df["neighborhood"] = incident_df["police_beat"].map(mapping).fillna("")
     incident_df["hit_run_lvl"] = incident_df["hit_run_lvl"].fillna("NONE")
     incident_df["date_time"] = pd.to_datetime(incident_df["date_time"])
     return incident_df.sort_values(by="date_time", ascending=False)
+
+
+def filter_date(start: str, end: str, incident_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Filters the incident dataframe to only include incidents within the specified date range.
+    Date format: 'YYYY-MM-DD'
+    """
+    start_date = pd.to_datetime(start)
+    end_date = pd.to_datetime(end)
+    return incident_df[
+        (incident_df["date_time"] >= start_date)
+        & (incident_df["date_time"] <= end_date)
+    ]
 
 
 def filter_for_casualties(incident_df: pd.DataFrame) -> pd.DataFrame:
@@ -71,26 +84,9 @@ def map_incident_dict_to_incident_dto(incident_dicts: list[dict]) -> list[Incide
         incident_dto = IncidentDTO()
         incident_dto.report_id = incident_dict.get("report_id")
         incident_dto.date_time = map_date_time_to_string(incident_dict.get("date_time"))
-        incident_dto.police_beat = incident_dict.get("police_beat")
-        incident_dto.address_no_primary = incident_dict.get("address_no_primary")
-        incident_dto.address_pd_primary = incident_dict.get("address_pd_primary")
-        incident_dto.address_road_primary = incident_dict.get("address_road_primary")
-        incident_dto.address_sfx_primary = incident_dict.get("address_sfx_primary")
-        incident_dto.address_pd_intersecting = incident_dict.get(
-            "address_pd_intersecting"
-        )
-        incident_dto.address_name_intersecting = incident_dict.get(
-            "address_name_intersecting"
-        )
-        incident_dto.address_sfx_intersecting = incident_dict.get(
-            "address_sfx_intersecting"
-        )
-        incident_dto.violation_section = incident_dict.get("violation_section")
-        incident_dto.violation_type = incident_dict.get("violation_type")
         incident_dto.charge_desc = incident_dict.get("charge_desc")
         incident_dto.injured = incident_dict.get("injured")
         incident_dto.killed = incident_dict.get("killed")
-        incident_dto.hit_run_lvl = incident_dict.get("hit_run_lvl")
         incident_dto.neighborhood = incident_dict.get("neighborhood")
         incident_dto.full_address = incident_dict.get("full_address")
 
@@ -128,9 +124,7 @@ def get_incident_metadata(df: pd.DataFrame) -> IncidentMetadataDTO:
     # Assume latest_date is in LA timezone (localize if naive)
     latest_date = dto_object.latest_date
     if latest_date.tzinfo is None:
-        print(latest_date)
         latest_date = la_tz.localize(latest_date)
-        print(latest_date)
     latest_date_la = latest_date.date()
 
     dto_object.number_of_days_since_last_incident = (now_la - latest_date_la).days
