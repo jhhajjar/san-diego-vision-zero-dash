@@ -1,3 +1,4 @@
+from enum import StrEnum
 import re
 import pandas as pd
 import pytz
@@ -5,6 +6,28 @@ import pytz
 from services.geocoding_service import geocode_address
 from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
 from typing import Tuple
+
+
+class Column(StrEnum):
+    REPORT_ID = "REPORT_ID"
+    DATE_TIME = "DATE_TIME"
+    POLICE_BEAT = "POLICE_BEAT"
+    ADDRESS_NO_PRIMARY = "ADDRESS_NO_PRIMARY"
+    ADDRESS_PD_PRIMARY = "ADDRESS_PD_PRIMARY"
+    ADDRESS_ROAD_PRIMARY = "ADDRESS_ROAD_PRIMARY"
+    ADDRESS_SFX_PRIMARY = "ADDRESS_SFX_PRIMARY"
+    ADDRESS_PD_INTERSECTING = "ADDRESS_PD_INTERSECTING"
+    ADDRESS_NAME_INTERSECTING = "ADDRESS_NAME_INTERSECTING"
+    ADDRESS_SFX_INTERSECTING = "ADDRESS_SFX_INTERSECTING"
+    VIOLATION_SECTION = "VIOLATION_SECTION"
+    VIOLATION_TYPE = "VIOLATION_TYPE"
+    CHARGE_DESC = "CHARGE_DESC"
+    INJURED = "INJURED"
+    KILLED = "KILLED"
+    HIT_RUN_LVL = "HIT_RUN_LVL"
+    FULL_ADDRESS = "full_address"
+    BEAT = "beat"
+    NEIGHBORHOOD = "neighborhood"
 
 
 def read_pd_csv() -> pd.DataFrame:
@@ -31,18 +54,20 @@ def read_pd_csv() -> pd.DataFrame:
     incident_source = (
         "https://seshat.datasd.org/traffic_collisions/pd_collisions_datasd.csv"
     )
-    incident_df = pd.read_csv(incident_source, parse_dates=["date_time"])
+    incident_df = pd.read_csv(incident_source, parse_dates=["DATE_TIME"])
     beats_df = pd.read_csv(
         "https://seshat.datasd.org/gis_police_beats/pd_beat_codes_list_datasd.csv"
     )
 
     # Create a mapping: index = beat, value = neighborhood
-    mapping = beats_df.set_index("beat")["neighborhood"]
+    mapping = beats_df.set_index(Column.BEAT)[Column.NEIGHBORHOOD]
     # Create the new column in df1 by mapping the 'beat' column (default to "" if not found)
-    incident_df["neighborhood"] = incident_df["police_beat"].map(mapping).fillna("")
-    incident_df["hit_run_lvl"] = incident_df["hit_run_lvl"].fillna("NONE")
-    incident_df["date_time"] = pd.to_datetime(incident_df["date_time"])
-    return incident_df.sort_values(by="date_time", ascending=False)
+    incident_df[Column.POLICE_BEAT] = (
+        incident_df[Column.POLICE_BEAT].map(mapping).fillna("")
+    )
+    incident_df[Column.HIT_RUN_LVL] = incident_df[Column.HIT_RUN_LVL].fillna("NONE")
+    incident_df[Column.DATE_TIME] = pd.to_datetime(incident_df[Column.DATE_TIME])
+    return incident_df.sort_values(by=Column.DATE_TIME, ascending=False)
 
 
 def filter_date(start: str, end: str, incident_df: pd.DataFrame) -> pd.DataFrame:
@@ -53,8 +78,8 @@ def filter_date(start: str, end: str, incident_df: pd.DataFrame) -> pd.DataFrame
     start_date = pd.to_datetime(start)
     end_date = pd.to_datetime(end)
     return incident_df[
-        (incident_df["date_time"] >= start_date)
-        & (incident_df["date_time"] <= end_date)
+        (incident_df[Column.DATE_TIME] >= start_date)
+        & (incident_df[Column.DATE_TIME] <= end_date)
     ]
 
 
@@ -62,7 +87,9 @@ def filter_for_casualties(incident_df: pd.DataFrame) -> pd.DataFrame:
     """
     Filters the incident dataframe to only include incidents with injuries or fatalities.
     """
-    return incident_df[(incident_df["injured"] > 0) | (incident_df["killed"] > 0)]
+    return incident_df[
+        (incident_df[Column.INJURED] > 0) | (incident_df[Column.KILLED] > 0)
+    ]
 
 
 def paginate(df: pd.DataFrame, page: int = 1, page_size: int = 10) -> pd.DataFrame:
@@ -82,13 +109,15 @@ def map_incident_dict_to_incident_dto(incident_dicts: list[dict]) -> list[Incide
     incident_dtos = []
     for incident_dict in incident_dicts:
         incident_dto = IncidentDTO()
-        incident_dto.report_id = incident_dict.get("report_id")
-        incident_dto.date_time = map_date_time_to_string(incident_dict.get("date_time"))
-        incident_dto.charge_desc = incident_dict.get("charge_desc")
-        incident_dto.injured = incident_dict.get("injured")
-        incident_dto.killed = incident_dict.get("killed")
-        incident_dto.neighborhood = incident_dict.get("neighborhood")
-        incident_dto.full_address = incident_dict.get("full_address")
+        incident_dto.report_id = incident_dict.get(Column.REPORT_ID)
+        incident_dto.date_time = map_date_time_to_string(
+            incident_dict.get(Column.DATE_TIME)
+        )
+        incident_dto.charge_desc = incident_dict.get(Column.CHARGE_DESC)
+        incident_dto.injured = incident_dict.get(Column.INJURED)
+        incident_dto.killed = incident_dict.get(Column.KILLED)
+        incident_dto.neighborhood = incident_dict.get(Column.NEIGHBORHOOD)
+        incident_dto.full_address = incident_dict.get(Column.FULL_ADDRESS)
 
         # Geocode the address to get lat/lng
         coords = geocode_address(incident_dto.full_address)
@@ -116,7 +145,7 @@ def get_incidents_and_count(
 def get_incident_metadata(df: pd.DataFrame) -> IncidentMetadataDTO:
     la_tz = pytz.timezone("America/Los_Angeles")
     dto_object = IncidentMetadataDTO()
-    dto_object.latest_date = df["date_time"].max()
+    dto_object.latest_date = df[Column.DATE_TIME].max()
 
     # Get current date in LA timezone
     now_la = pd.Timestamp.now(tz=la_tz).date()
@@ -150,18 +179,18 @@ def parse_full_address(df: pd.DataFrame) -> pd.DataFrame:
     """
 
     def construct_full_address(row):
-        address = f"{row['address_pd_primary']} {row['address_road_primary']} {row['address_sfx_primary']}"
-        if row["address_no_primary"] > 0:
+        address = f"{row[Column.ADDRESS_PD_PRIMARY]} {row[Column.ADDRESS_ROAD_PRIMARY]} {row[Column.ADDRESS_SFX_PRIMARY]}"
+        if row[Column.ADDRESS_NO_PRIMARY] > 0:
             # If there is a st number, there is no intersection
-            address = f"{row['address_no_primary']}" + " " + address
+            address = f"{row[Column.ADDRESS_NO_PRIMARY]}" + " " + address
         else:
             # else use the intersecting st
             address += (
                 " and "
-                + f"{row['address_pd_intersecting']} {row['address_name_intersecting']} {row['address_sfx_intersecting']}"
+                + f"{row[Column.ADDRESS_PD_INTERSECTING]} {row[Column.ADDRESS_NAME_INTERSECTING]} {row[Column.ADDRESS_SFX_INTERSECTING]}"
             )
         address = address + ", SAN DIEGO, CA"
         return re.sub(" +", " ", address)
 
-    df["full_address"] = df.apply(construct_full_address, axis=1)
+    df[Column.FULL_ADDRESS] = df.apply(construct_full_address, axis=1)
     return df
