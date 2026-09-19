@@ -30,6 +30,14 @@ class Column(StrEnum):
     NEIGHBORHOOD = "neighborhood"
 
 
+COLLISIONS_DF_URL = (
+    "https://seshat.datasd.org/traffic_collisions/pd_collisions_datasd.csv"
+)
+BEATS_DF_URL = (
+    "https://seshat.datasd.org/gis_police_beats/pd_beat_codes_list_datasd.csv"
+)
+
+
 def read_pd_csv() -> pd.DataFrame:
     """
     Column descriptions:
@@ -51,13 +59,9 @@ def read_pd_csv() -> pd.DataFrame:
     killed: Number of people killed in collision
     hit_run_lvl: Level of violation, if collision was a hit & run
     """
-    incident_source = (
-        "https://seshat.datasd.org/traffic_collisions/pd_collisions_datasd.csv"
-    )
-    incident_df = pd.read_csv(incident_source, parse_dates=["DATE_TIME"])
-    beats_df = pd.read_csv(
-        "https://seshat.datasd.org/gis_police_beats/pd_beat_codes_list_datasd.csv"
-    )
+
+    incident_df = pd.read_csv(COLLISIONS_DF_URL, parse_dates=["DATE_TIME"])
+    beats_df = pd.read_csv(BEATS_DF_URL)
 
     # Create a mapping: index = beat, value = neighborhood
     mapping = beats_df.set_index(Column.BEAT)[Column.NEIGHBORHOOD]
