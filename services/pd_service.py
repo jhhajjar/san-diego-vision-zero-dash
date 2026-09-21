@@ -11,6 +11,12 @@ from typing import Tuple
 class Column(StrEnum):
     REPORT_ID = "REPORT_ID"
     DATE_TIME = "DATE_TIME"
+    PERSON_ROLE = "PERSON_ROLE"
+    PERSON_INJURY_LVL = "PERSON_INJURY_LVL"
+    PERSON_VEH_TYPE = "PERSON_VEH_TYPE"
+    VEH_TYPE = "VEH_TYPE"
+    VEH_MAKE = "VEH_MAKE"
+    VEH_MODEL = "VEH_MODEL"
     POLICE_BEAT = "POLICE_BEAT"
     ADDRESS_NO_PRIMARY = "ADDRESS_NO_PRIMARY"
     ADDRESS_PD_PRIMARY = "ADDRESS_PD_PRIMARY"
@@ -30,9 +36,7 @@ class Column(StrEnum):
     NEIGHBORHOOD = "neighborhood"
 
 
-COLLISIONS_DF_URL = (
-    "https://seshat.datasd.org/traffic_collisions/pd_collisions_datasd.csv"
-)
+COLLISIONS_DF_URL = "https://seshat.datasd.org/traffic_collision_details/pd_collisions_details_datasd.csv"
 BEATS_DF_URL = (
     "https://seshat.datasd.org/gis_police_beats/pd_beat_codes_list_datasd.csv"
 )
@@ -71,6 +75,7 @@ def read_pd_csv() -> pd.DataFrame:
     )
     incident_df[Column.HIT_RUN_LVL] = incident_df[Column.HIT_RUN_LVL].fillna("NONE")
     incident_df[Column.DATE_TIME] = pd.to_datetime(incident_df[Column.DATE_TIME])
+    incident_df = incident_df[incident_df[Column.PERSON_INJURY_LVL].notna()]
     return incident_df.sort_values(by=Column.DATE_TIME, ascending=False)
 
 
@@ -186,7 +191,9 @@ def parse_full_address(df: pd.DataFrame) -> pd.DataFrame:
         address = f"{row[Column.ADDRESS_PD_PRIMARY]} {row[Column.ADDRESS_ROAD_PRIMARY]} {row[Column.ADDRESS_SFX_PRIMARY]}"
         if row[Column.ADDRESS_NO_PRIMARY] > 0:
             # If there is a st number, there is no intersection
-            address = f"{row[Column.ADDRESS_NO_PRIMARY]}" + " " + address
+            address = (
+                f"{str(row[Column.ADDRESS_NO_PRIMARY]).split('.')[0]}" + " " + address
+            )
         else:
             # else use the intersecting st
             address += (
