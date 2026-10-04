@@ -76,6 +76,9 @@ def read_pd_csv() -> pd.DataFrame:
     incident_df[Column.HIT_RUN_LVL] = incident_df[Column.HIT_RUN_LVL].fillna("NONE")
     incident_df[Column.DATE_TIME] = pd.to_datetime(incident_df[Column.DATE_TIME])
     incident_df = incident_df[incident_df[Column.PERSON_INJURY_LVL].notna()]
+    incident_df = incident_df.drop_duplicates(
+        [Column.DATE_TIME, Column.INJURED, Column.KILLED], keep="first"
+    )
     return incident_df.sort_values(by=Column.DATE_TIME, ascending=False)
 
 
