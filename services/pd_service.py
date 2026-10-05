@@ -64,7 +64,7 @@ def read_pd_csv() -> pd.DataFrame:
     hit_run_lvl: Level of violation, if collision was a hit & run
     """
 
-    incident_df = pd.read_csv(COLLISIONS_DF_URL, parse_dates=["DATE_TIME"])
+    incident_df = pd.read_csv(COLLISIONS_DF_URL, parse_dates=[Column.DATE_TIME])
     beats_df = pd.read_csv(BEATS_DF_URL)
 
     # Create a mapping: index = beat, value = neighborhood

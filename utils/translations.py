@@ -1,0 +1,147 @@
+from enum import StrEnum
+
+
+class Neighborhood(StrEnum):
+    SOUTH_SAN_DIEGO = "South San Diego"
+    POINT_LOMA = "Point Loma"
+    COASTAL = "Coastal"
+    CENTRAL_SUBURBS = "Central Suburbs"
+    EAST_SAN_DIEGO = "East San Diego"
+    NORTHERN_SUBURBS = "Northern Suburbs"
+    MID_CITY = "Mid-City"
+    NAVAJO_COMMUNITIES = "Navajo Communities"
+    URBAN_CORE = "Urban Core"
+
+
+neighborhood_to_beats = {
+    Neighborhood.SOUTH_SAN_DIEGO: [
+        711,  # Tijuana River Valley
+        712,  # San Ysidro
+        713,  # Otay Mesa
+        714,  # Border
+        723,  # Otay Mesa West
+        721,  # Egger Highlands
+        722,  # Nestor
+        724,  # Palm City
+        725,  # Ocean Crest
+    ],
+    Neighborhood.POINT_LOMA: [
+        611,  # Midway District
+        612,  # Loma Portal
+        613,  # Point Loma Heights
+        614,  # OB
+        615,  # Roseville/Fleet Ridge
+        616,  # La Playa
+        617,  # Wooded Area
+        618,  # Sunset Cliffs
+    ],
+    Neighborhood.COASTAL: [
+        121,  # Mission Beach
+        122,  # Pacific Beach
+        123,  # Mission Bay Park
+        124,  # La Jolla
+        126,  # Torrey Pines
+    ],
+    Neighborhood.CENTRAL_SUBURBS: [
+        115,  # University City
+        111,  # Clairemont Mesa East
+        112,  # Clairemont Mesa West
+        113,  # Bay Ho
+        114,  # North Clairemont
+        116,  # Bay Park
+        311,  # Serra Mesa
+        312,  # Tierrasanta
+        313,  # Kearny Mesa
+        314,  # Birdland
+        621,  # Linda Vista
+        622,  # Morena
+    ],
+    Neighborhood.EAST_SAN_DIEGO: [
+        431,  # Emerald Hills
+        432,  # Valencia Park
+        433,  # Encanto
+        434,  # Jamacha/Lomita
+        435,  # Broadway Heights
+        436,  # Skyline
+        437,  # Bay Terraces
+        438,  # Paradise Hills
+        439,  # Alta Vista
+        441,  # Mountain View
+        442,  # Southcrest
+        445,  # Chollas View
+        446,  # Lincoln Park
+        447,  # Ridgeview/Webster
+        451,  # Oak Park
+        452,  # O'Farrell
+    ],
+    Neighborhood.NORTHERN_SUBURBS: [
+        231,  # Sabre Springs
+        232,  # Carmel Mountain
+        233,  # Rancho Penasquitos
+        234,  # Rancho Bernardo
+        235,  # San Pasqual
+        241,  # Scripps Ranch
+        242,  # Mira Mesa
+        243,  # Miramar
+        245,  # Rancho Encantada
+        246,  # Miramar Ranch North
+        313,  # Kearny Mesa
+        931,  # Sorrento Valley
+        936,  # Torrey Highlands
+        937,  # Black Mountain Ranch
+    ],
+    Neighborhood.MID_CITY: [
+        326,  # College West
+        327,  # College East
+        821,  # Rolando
+        822,  # El Cerrito
+        823,  # Redwood Village
+        824,  # Talmadge
+        825,  # Kensington
+        826,  # Colina del Sol
+        827,  # Chollas Creek
+        828,  # Fox Canyon
+        829,  # Islenair
+        831,  # Teralta East
+        832,  # Teralta West
+        833,  # Fairmount Village
+        834,  # Castle
+        835,  # Azalea/Hollywood Park
+        836,  # Swan Canyon
+        837,  # Fairmount Park
+        838,  # Corridor
+        839,  # Cherokee Point
+        841,  # Rolando Park
+    ],
+    Neighborhood.NAVAJO_COMMUNITIES: [
+        321,  # Grantville
+        322,  # Allied Gardens
+        323,  # Del Cerro
+        324,  # Lake Murray
+        325,  # San Carlos
+    ],
+    Neighborhood.URBAN_CORE: [
+        517,  # Golden Hill
+        518,  # South Park
+        521,  # East Village
+        522,  # Marina
+        523,  # Gaslamp
+        524,  # Core-Columbia
+        525,  # Horton Plaza
+        526,  # Cortez
+        527,  # Harborview
+        528,  # Little Italy
+        529,  # Park West
+        531,  # Balboa Park
+        541,  # Petco Park
+        624,  # University Heights
+        625,  # Old Town
+        626,  # Mission Hills
+        627,  # Hillcrest
+        628,  # Midtown
+        811,  # Normal Heights
+        812,  # Burlingame
+        813,  # North Park
+        814,  # Adams North
+    ],
+}
