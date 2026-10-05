@@ -41,6 +41,8 @@ neighborhood_to_beats = {
         123,  # Mission Bay Park
         124,  # La Jolla
         126,  # Torrey Pines
+        933,  # Del Mar Heights
+        932,  # Torrey Preserve
     ],
     Neighborhood.CENTRAL_SUBURBS: [
         115,  # University City
@@ -55,6 +57,9 @@ neighborhood_to_beats = {
         314,  # Birdland
         621,  # Linda Vista
         622,  # Morena
+        623,  # Mission Valley West
+        315,  # Mission Valley East
+        316,  # Qualcomm
     ],
     Neighborhood.EAST_SAN_DIEGO: [
         431,  # Emerald Hills
@@ -68,11 +73,16 @@ neighborhood_to_beats = {
         439,  # Alta Vista
         441,  # Mountain View
         442,  # Southcrest
+        443,  # Shelltown
+        444,  # Mt. Hope
         445,  # Chollas View
         446,  # Lincoln Park
         447,  # Ridgeview/Webster
         451,  # Oak Park
         452,  # O'Farrell
+        511,  # Barrio Logan
+        512,  # Logan Heights
+        516,  # Stockton
     ],
     Neighborhood.NORTHERN_SUBURBS: [
         231,  # Sabre Springs
@@ -87,6 +97,8 @@ neighborhood_to_beats = {
         246,  # Miramar Ranch North
         313,  # Kearny Mesa
         931,  # Sorrento Valley
+        934,  # Carmel Valley
+        935,  # North City
         936,  # Torrey Highlands
         937,  # Black Mountain Ranch
     ],
@@ -121,6 +133,8 @@ neighborhood_to_beats = {
         325,  # San Carlos
     ],
     Neighborhood.URBAN_CORE: [
+        514,  # Sherman Heights
+        515,  # Grant Hill
         517,  # Golden Hill
         518,  # South Park
         521,  # East Village
