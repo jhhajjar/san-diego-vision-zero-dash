@@ -13,7 +13,7 @@ class Neighborhood(StrEnum):
     URBAN_CORE = "Urban Core"
 
 
-neighborhood_to_beats = {
+NEIGHBORHOOD_TO_BEATS = {
     Neighborhood.SOUTH_SAN_DIEGO: [
         711,  # Tijuana River Valley
         712,  # San Ysidro

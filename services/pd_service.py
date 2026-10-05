@@ -1,11 +1,12 @@
-from enum import StrEnum
 import re
 import pandas as pd
 import pytz
 
+from utils.translations import NEIGHBORHOOD_TO_BEATS
 from services.geocoding_service import geocode_address
 from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
 from typing import Tuple
+from enum import StrEnum
 
 
 class Column(StrEnum):
@@ -42,7 +43,7 @@ BEATS_DF_URL = (
 )
 
 
-def read_pd_csv() -> pd.DataFrame:
+def read_pd_csv(filter: object = {}) -> pd.DataFrame:
     """
     Column descriptions:
 
@@ -66,6 +67,14 @@ def read_pd_csv() -> pd.DataFrame:
 
     incident_df = pd.read_csv(COLLISIONS_DF_URL, parse_dates=[Column.DATE_TIME])
     beats_df = pd.read_csv(BEATS_DF_URL)
+
+    if "neighborhoods" in filter:
+        beats_to_include = []
+        for neighborhood in filter["neighborhoods"]:
+            beats_to_include.extend(NEIGHBORHOOD_TO_BEATS.get(neighborhood, []))
+        incident_df = incident_df[
+            incident_df[Column.POLICE_BEAT].isin(beats_to_include)
+        ]
 
     # Create a mapping: index = beat, value = neighborhood
     mapping = beats_df.set_index(Column.BEAT)[Column.NEIGHBORHOOD]
@@ -145,9 +154,9 @@ def map_incident_dict_to_incident_dto(incident_dicts: list[dict]) -> list[Incide
 
 
 def get_incidents_and_count(
-    page: int = 1, page_size: int = 10
+    filter: object = {}, page: int = 1, page_size: int = 10
 ) -> Tuple[pd.DataFrame, int]:
-    df = read_pd_csv()
+    df = read_pd_csv(filter)
     filtered_df = filter_for_casualties(df)
     df_with_addresses = parse_full_address(filtered_df)
     paginated_df = paginate(df_with_addresses, page, page_size)
