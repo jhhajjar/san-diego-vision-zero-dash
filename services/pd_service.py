@@ -2,39 +2,11 @@ import re
 import pandas as pd
 import pytz
 
-from utils.translations import NEIGHBORHOOD_TO_BEATS
 from services.geocoding_service import geocode_address
+from utils.pd_enums import Column, translate_severity
+from utils.translations import NEIGHBORHOOD_TO_BEATS
 from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
 from typing import Tuple
-from enum import StrEnum
-
-
-class Column(StrEnum):
-    REPORT_ID = "REPORT_ID"
-    DATE_TIME = "DATE_TIME"
-    PERSON_ROLE = "PERSON_ROLE"
-    PERSON_INJURY_LVL = "PERSON_INJURY_LVL"
-    PERSON_VEH_TYPE = "PERSON_VEH_TYPE"
-    VEH_TYPE = "VEH_TYPE"
-    VEH_MAKE = "VEH_MAKE"
-    VEH_MODEL = "VEH_MODEL"
-    POLICE_BEAT = "POLICE_BEAT"
-    ADDRESS_NO_PRIMARY = "ADDRESS_NO_PRIMARY"
-    ADDRESS_PD_PRIMARY = "ADDRESS_PD_PRIMARY"
-    ADDRESS_ROAD_PRIMARY = "ADDRESS_ROAD_PRIMARY"
-    ADDRESS_SFX_PRIMARY = "ADDRESS_SFX_PRIMARY"
-    ADDRESS_PD_INTERSECTING = "ADDRESS_PD_INTERSECTING"
-    ADDRESS_NAME_INTERSECTING = "ADDRESS_NAME_INTERSECTING"
-    ADDRESS_SFX_INTERSECTING = "ADDRESS_SFX_INTERSECTING"
-    VIOLATION_SECTION = "VIOLATION_SECTION"
-    VIOLATION_TYPE = "VIOLATION_TYPE"
-    CHARGE_DESC = "CHARGE_DESC"
-    INJURED = "INJURED"
-    KILLED = "KILLED"
-    HIT_RUN_LVL = "HIT_RUN_LVL"
-    FULL_ADDRESS = "full_address"
-    BEAT = "beat"
-    NEIGHBORHOOD = "neighborhood"
 
 
 COLLISIONS_DF_URL = "https://seshat.datasd.org/traffic_collision_details/pd_collisions_details_datasd.csv"
@@ -74,6 +46,13 @@ def read_pd_csv(filter: object = {}) -> pd.DataFrame:
             beats_to_include.extend(NEIGHBORHOOD_TO_BEATS.get(neighborhood, []))
         incident_df = incident_df[
             incident_df[Column.POLICE_BEAT].isin(beats_to_include)
+        ]
+
+    if "severity" in filter:
+        severity_lvl = filter["severity"]
+        valid_values = translate_severity(severity_lvl)
+        incident_df = incident_df[
+            incident_df[Column.PERSON_INJURY_LVL].isin(valid_values)
         ]
 
     # Create a mapping: index = beat, value = neighborhood
