@@ -40,13 +40,13 @@ class Severity(StrEnum):
     FATAL = "FATAL"
 
 
-def translate_severity(severity_lvl: Literal["light", "serious", "fatal"]):
+def translate_severity(severity_lvl: Literal["Light", "Serious", "Fatal"]):
     light = [Severity.POSSIBLE, Severity.MINOR, Severity.VISABLE, Severity.PAIN]
     serious = [Severity.SERIOUS, Severity.SEVERE]
     fatal = [Severity.FATAL]
-    if severity_lvl == "light":
+    if severity_lvl == "Light":
         return light
-    if severity_lvl == "serious":
+    if severity_lvl == "Serious":
         return serious
-    if severity_lvl == "fatal":
+    if severity_lvl == "Fatal":
         return fatal
