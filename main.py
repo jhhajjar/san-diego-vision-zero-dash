@@ -9,7 +9,7 @@ from services.pd_service import (
 )
 from flask_cors import CORS
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
+from flask import Flask, json, jsonify, request
 
 app = Flask(__name__)
 load_dotenv()
@@ -33,11 +33,14 @@ def articles():
 @app.route("/incidents")
 def incidents():
     # Parse pagination parameters
+    filter = json.loads(request.args.get("filter", default="{}"))
     page = request.args.get("page", default=1, type=int)
     page_size = request.args.get("pageSize", default=10, type=int)
 
     # Fetch paginated incidents
-    incidents_df, total = get_incidents_and_count(page=page, page_size=page_size)
+    incidents_df, total = get_incidents_and_count(
+        filter, page=page, page_size=page_size
+    )
 
     # Map to DTO
     mapped_response = map_incident_df_to_incident_list_dto(

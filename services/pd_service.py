@@ -1,39 +1,12 @@
-from enum import StrEnum
 import re
 import pandas as pd
 import pytz
 
 from services.geocoding_service import geocode_address
+from utils.pd_enums import Column, translate_severity
+from utils.translations import NEIGHBORHOOD_TO_BEATS
 from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
 from typing import Tuple
-
-
-class Column(StrEnum):
-    REPORT_ID = "REPORT_ID"
-    DATE_TIME = "DATE_TIME"
-    PERSON_ROLE = "PERSON_ROLE"
-    PERSON_INJURY_LVL = "PERSON_INJURY_LVL"
-    PERSON_VEH_TYPE = "PERSON_VEH_TYPE"
-    VEH_TYPE = "VEH_TYPE"
-    VEH_MAKE = "VEH_MAKE"
-    VEH_MODEL = "VEH_MODEL"
-    POLICE_BEAT = "POLICE_BEAT"
-    ADDRESS_NO_PRIMARY = "ADDRESS_NO_PRIMARY"
-    ADDRESS_PD_PRIMARY = "ADDRESS_PD_PRIMARY"
-    ADDRESS_ROAD_PRIMARY = "ADDRESS_ROAD_PRIMARY"
-    ADDRESS_SFX_PRIMARY = "ADDRESS_SFX_PRIMARY"
-    ADDRESS_PD_INTERSECTING = "ADDRESS_PD_INTERSECTING"
-    ADDRESS_NAME_INTERSECTING = "ADDRESS_NAME_INTERSECTING"
-    ADDRESS_SFX_INTERSECTING = "ADDRESS_SFX_INTERSECTING"
-    VIOLATION_SECTION = "VIOLATION_SECTION"
-    VIOLATION_TYPE = "VIOLATION_TYPE"
-    CHARGE_DESC = "CHARGE_DESC"
-    INJURED = "INJURED"
-    KILLED = "KILLED"
-    HIT_RUN_LVL = "HIT_RUN_LVL"
-    FULL_ADDRESS = "full_address"
-    BEAT = "beat"
-    NEIGHBORHOOD = "neighborhood"
 
 
 COLLISIONS_DF_URL = "https://seshat.datasd.org/traffic_collision_details/pd_collisions_details_datasd.csv"
@@ -42,7 +15,7 @@ BEATS_DF_URL = (
 )
 
 
-def read_pd_csv() -> pd.DataFrame:
+def read_pd_csv(filter: object = {}) -> pd.DataFrame:
     """
     Column descriptions:
 
@@ -64,8 +37,23 @@ def read_pd_csv() -> pd.DataFrame:
     hit_run_lvl: Level of violation, if collision was a hit & run
     """
 
-    incident_df = pd.read_csv(COLLISIONS_DF_URL, parse_dates=["DATE_TIME"])
+    incident_df = pd.read_csv(COLLISIONS_DF_URL, parse_dates=[Column.DATE_TIME])
     beats_df = pd.read_csv(BEATS_DF_URL)
+
+    if "neighborhoods" in filter:
+        beats_to_include = []
+        for neighborhood in filter["neighborhoods"]:
+            beats_to_include.extend(NEIGHBORHOOD_TO_BEATS.get(neighborhood, []))
+        incident_df = incident_df[
+            incident_df[Column.POLICE_BEAT].isin(beats_to_include)
+        ]
+
+    if "severity" in filter:
+        severity_lvl = filter["severity"]
+        valid_values = translate_severity(severity_lvl)
+        incident_df = incident_df[
+            incident_df[Column.PERSON_INJURY_LVL].isin(valid_values)
+        ]
 
     # Create a mapping: index = beat, value = neighborhood
     mapping = beats_df.set_index(Column.BEAT)[Column.NEIGHBORHOOD]
@@ -145,9 +133,9 @@ def map_incident_dict_to_incident_dto(incident_dicts: list[dict]) -> list[Incide
 
 
 def get_incidents_and_count(
-    page: int = 1, page_size: int = 10
+    filter: object = {}, page: int = 1, page_size: int = 10
 ) -> Tuple[pd.DataFrame, int]:
-    df = read_pd_csv()
+    df = read_pd_csv(filter)
     filtered_df = filter_for_casualties(df)
     df_with_addresses = parse_full_address(filtered_df)
     paginated_df = paginate(df_with_addresses, page, page_size)
