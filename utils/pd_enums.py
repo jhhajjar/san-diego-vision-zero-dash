@@ -25,6 +25,7 @@ class Column(StrEnum):
     INJURED = "INJURED"
     KILLED = "KILLED"
     HIT_RUN_LVL = "HIT_RUN_LVL"
+    SEVERITY = "_SEVERITY"
     FULL_ADDRESS = "full_address"
     BEAT = "beat"
     NEIGHBORHOOD = "neighborhood"
@@ -40,13 +41,24 @@ class Severity(StrEnum):
     FATAL = "FATAL"
 
 
+SEVERITY_RANK = {
+    # Light
+    Severity.POSSIBLE: 1,
+    Severity.PAIN: 1,
+    Severity.VISABLE: 1,
+    Severity.MINOR: 1,
+    # Serious
+    Severity.SERIOUS: 2,
+    Severity.SEVERE: 2,
+    # Fatal
+    Severity.FATAL: 3,
+}
+
+
 def translate_severity(severity_lvl: Literal["Light", "Serious", "Fatal"]):
-    light = [Severity.POSSIBLE, Severity.MINOR, Severity.VISABLE, Severity.PAIN]
-    serious = [Severity.SERIOUS, Severity.SEVERE]
-    fatal = [Severity.FATAL]
     if severity_lvl == "Light":
-        return light
+        return 1
     if severity_lvl == "Serious":
-        return serious
+        return 2
     if severity_lvl == "Fatal":
-        return fatal
+        return 3

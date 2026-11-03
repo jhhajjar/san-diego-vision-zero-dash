@@ -3,7 +3,7 @@ import pandas as pd
 import pytz
 
 from services.geocoding_service import geocode_address
-from utils.pd_enums import Column, translate_severity
+from utils.pd_enums import Column, translate_severity, SEVERITY_RANK
 from utils.translations import NEIGHBORHOOD_TO_BEATS
 from entity.Incident import IncidentDTO, IncidentListDTO, IncidentMetadataDTO
 from typing import Tuple
@@ -40,6 +40,30 @@ def read_pd_csv(filter: object = {}) -> pd.DataFrame:
     incident_df = pd.read_csv(COLLISIONS_DF_URL, parse_dates=[Column.DATE_TIME])
     beats_df = pd.read_csv(BEATS_DF_URL)
 
+    # Create a mapping: index = beat, value = neighborhood
+    mapping = beats_df.set_index(Column.BEAT)[Column.NEIGHBORHOOD]
+    # Create the new column in df1 by mapping the 'beat' column (default to "" if not found)
+    incident_df[Column.POLICE_BEAT] = (
+        incident_df[Column.POLICE_BEAT].map(mapping).fillna("")
+    )
+
+    # Convert to date time
+    incident_df[Column.DATE_TIME] = pd.to_datetime(incident_df[Column.DATE_TIME])
+
+    # For each report id, get max severity level and populate column with it
+    incident_df[Column.SEVERITY] = (
+        incident_df[Column.PERSON_INJURY_LVL]
+        .map(SEVERITY_RANK)
+        .groupby(incident_df[Column.REPORT_ID])
+        .transform("max")
+    )
+
+    # Find only rows with injuries
+    incident_df = incident_df[
+        (incident_df[Column.INJURED] > 0) | (incident_df[Column.KILLED] > 0)
+    ]
+    incident_df = incident_df.drop_duplicates(subset=[Column.REPORT_ID], keep="first")
+
     if "neighborhoods" in filter:
         beats_to_include = []
         for neighborhood in filter["neighborhoods"]:
@@ -50,23 +74,9 @@ def read_pd_csv(filter: object = {}) -> pd.DataFrame:
 
     if "severity" in filter:
         severity_lvl = filter["severity"]
-        valid_values = translate_severity(severity_lvl)
-        incident_df = incident_df[
-            incident_df[Column.PERSON_INJURY_LVL].isin(valid_values)
-        ]
+        severity_translated = translate_severity(severity_lvl)
+        incident_df = incident_df[incident_df[Column.SEVERITY] == severity_translated]
 
-    # Create a mapping: index = beat, value = neighborhood
-    mapping = beats_df.set_index(Column.BEAT)[Column.NEIGHBORHOOD]
-    # Create the new column in df1 by mapping the 'beat' column (default to "" if not found)
-    incident_df[Column.POLICE_BEAT] = (
-        incident_df[Column.POLICE_BEAT].map(mapping).fillna("")
-    )
-    incident_df[Column.HIT_RUN_LVL] = incident_df[Column.HIT_RUN_LVL].fillna("NONE")
-    incident_df[Column.DATE_TIME] = pd.to_datetime(incident_df[Column.DATE_TIME])
-    # incident_df = incident_df[incident_df[Column.PERSON_INJURY_LVL].notna()]
-    incident_df = incident_df.drop_duplicates(
-        [Column.DATE_TIME, Column.INJURED, Column.KILLED], keep="first"
-    )
     return incident_df.sort_values(by=Column.DATE_TIME, ascending=False)
 
 
